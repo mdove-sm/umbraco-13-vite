@@ -481,3 +481,4 @@ appsettings-schema.*.json
 /wwwroot/media/
 
 /wwwroot/assets/
+/frontend/node_modules
