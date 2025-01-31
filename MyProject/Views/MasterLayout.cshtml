@@ -1,0 +1,38 @@
+@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+	Layout = null;
+}
+<!DOCTYPE html>
+<html lang="" class="no-js">
+	<head>
+		<title>@Model.Name</title>
+
+		<environment include="Development">
+			<script type="module" defer src="~/@@vite/client"></script> <!-- load Vite -->
+			<script type="module" defer src="~/src/js/main.js"></script> <!-- define the entry point -->
+			<script type="module" defer src="~/src/js/modules.js"></script> <!-- define the entry point -->
+		</environment>
+
+		<environment exclude="Development">
+			<link rel="stylesheet" asp-href-include="~/assets/main.css"> <!-- load styles -->
+			<link rel="stylesheet" defer asp-href-include="~/assets/modules.css"> <!-- load styles -->
+			<script type="module" defer asp-src-include="~/assets/main.js"></script> <!-- load Vite build output -->
+			<script type="module" defer asp-src-include="~/assets/modules.js"></script> <!-- load Vite build output -->
+		</environment>
+
+	</head>
+	<body>
+
+		<div id="mod1">module 1</div>
+		<div id="mod2">module 2</div>
+		<div class="site">
+			<img src="./assets/images/abstract1.jpg" alt="AltText" width="300" height="auto" />
+			<div id="svg-vite"></div>
+			<svg width="100" height="100"><use xlink:href="./assets/svg/spritemap.svg#vite"></use></svg>
+			<main class="main">
+				@RenderBody()
+			</main>
+		</div>
+	</body>
+</html>
