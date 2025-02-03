@@ -4,7 +4,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddViteServices(options =>
 {
-    options.Server.PackageDirectory = "../frontend";
+    options.Server.PackageDirectory = "./";
     options.Server.AutoRun = true;
     options.Server.Https = true;
 });
