@@ -1,1 +1,3 @@
-console.log("HELLO COMPONENT JS");
+export default function component() {
+	console.log("HELLO COMPONENT JS");
+}

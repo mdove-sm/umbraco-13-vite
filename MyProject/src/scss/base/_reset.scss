@@ -1,0 +1,88 @@
+@use "normalize.scss/normalize";
+@use "../utilities/" as *;
+
+html {
+	height: -webkit-fill-available; // HACK: IOS UI/VH FIX
+}
+body {
+	min-height: -webkit-fill-available; // HACK: IOS UI/VH FIX
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0;
+	text-decoration: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-webkit-text-size-adjust: none;
+	height: 100%;
+	scroll-padding-top: var(--navbar-height);
+	// @include noReducedMotion {
+	// 	// scroll-behavior: smooth;
+	// }
+
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+		background-size: cover;
+		background-repeat: no-repeat;
+		text-wrap: pretty;
+		transform-origin: center center;
+	}
+
+	:where(a) {
+		cursor: pointer;
+	}
+
+	:where(figure) {
+		display: block;
+		margin: 0;
+	}
+
+	:where(img),
+	:where(svg) {
+		max-width: 100%;
+		height: auto;
+	}
+	:where(svg) {
+		fill: currentColor;
+		> * {
+			transform-origin: 0 0 0;
+		}
+	}
+
+	:where(object),
+	:where(video) {
+		max-width: 100%;
+		object-fit: cover;
+		height: auto;
+		outline: none;
+	}
+	:where(iframe) {
+		border: 0;
+		width: 100%;
+	}
+	:where(menu) {
+		@include stripList;
+	}
+	:where(p:empty) {
+		display: none;
+	}
+	:where(address) {
+		font-style: normal;
+	}
+
+	:where(blockquote) {
+		margin-inline: 0;
+
+		:where(cite) {
+			font-style: normal;
+		}
+	}
+	:where(a) {
+		color: inherit;
+		text-decoration: none;
+	}
+}

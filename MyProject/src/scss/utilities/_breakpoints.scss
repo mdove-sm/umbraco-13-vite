@@ -1,0 +1,337 @@
+@use "sass:map";
+@use "sass:list";
+//==========================================================================
+//
+//  ___ _    _____  _____     ___  _   _ ___ _____   __ \\
+// | __| |  | __\ \/ /_ _|__ / _ \| | | | __| _ \ \ / / \\
+// | _|| |__| _| >  < | |___| (_) | |_| | _||   /\ V /  \\
+// |_| |____|___/_/\_\___|   \__\_\\___/|___|_|_\ |_|   \\
+//          The Flexible media query mixin              \\
+//
+//	Author: Mike Dove
+//	email: hello@metadiv.co.uk
+//	version: 1.02
+//	licence: free
+//
+//	requirements (please read):
+//
+// Usage:
+// 			@use '<PATH>/breakpoints' as *;
+// 			@include bp(md) { @content } [min-width media query]
+// 			@include bp(xl, max) { @content } [max-width media query]
+// 			@include bp(sm, to, xl) { @content } [min-width to  max-width media query]
+// 			@include bp(900px) { @content } [custom value min-width media query]
+// 			See below for BP values and types
+//==========================================================================
+
+$bps: (
+	//
+	"none": 0,
+	// Small phones
+	"xs": 320px,
+	// Medium / large phones
+	"sm": 480px,
+	// X Large phones & Small tablets
+	"md": 768px,
+	// large Tablets & small desktops
+	"lg": 900px,
+	// large desktop & landscape
+	"xl": 1200px,
+	// X Large desktop
+	"xxl": 1400px
+);
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+//Breakpoint tracking and indexing variables and functions
+$bp-types: (
+	//
+	"min": "min-width",
+	// @include bp($min) { @content }
+	"max": "max-width",
+	// @include bp($max, 'max') { @content }
+	"to": "width",
+	// @include bp($min, 'to', $max) { @content }}
+	"min-height": "min-height",
+	// @include bp($max, 'min-height') { @content }
+	"max-height": "max-height",
+	// @include bp($min, 'max-height') { @content }
+	"to-height": "height",
+	// @include bp($min, 'to-height', $max) { @content }
+	"orientation": "orientation",
+	// @include bp( $orientation, 'orientation') { @content }
+	"min-ratio": "min-aspect-ratio",
+	// @include bp($min, 'min-ratio') { @content }
+	"max-ratio": "max-aspect-ratio",
+	// @include bp($max, 'max-ratio') { @content }
+	"to-ratio": "aspect-ratio",
+	// @include bp($min, 'to-ratio', $max) { @content }
+);
+
+$bp-total: list.length($bps); //Get Total number of brekapoints
+$bp-index: (); //Create lobal index list
+$bp-count: 0; //Start count for index numbers
+
+//For each breakpoint, assign a number as a global index and
+@each $breakpoint in $bps {
+	//+1 the count (so first breakpoint index = 1)
+	$bp-count: $bp-count + 1;
+
+	//Get the Breakpoint Shortname
+	$bp-shortname: list.nth($breakpoint, 1);
+
+	//Add that key and the current count to $bp-index map
+	$bp-index: map.merge(
+		$bp-index,
+		(
+			$bp-shortname: $bp-count,
+		)
+	);
+}
+
+//Function to get the next Breakpoint in the map
+//Adapted from https://gist.github.com/agorilla/9df052eb1e15d8aea446 by Github: agorilla
+@function next-bp($key) {
+	// Init index counter variable
+	$i: 0;
+
+	// Init key index
+	$key-index: false;
+
+	// Traverse map for key
+	@each $map-key, $map-value in $bps {
+		// Update index
+		$i: $i + 1;
+
+		// If map key found, set key index
+		@if $map-key==$key {
+			$key-index: $i;
+		}
+
+		// If next index return next value
+		@if $i==$key-index + 1 {
+			@return $map-value;
+		}
+
+		// If last entry return false
+		@if $i==length($bps) {
+			@return false;
+		}
+	}
+}
+
+//Breakpoint Mixin
+//Options:
+//$bp1: choose your first breakpoint to target
+//$type: Choose type of media query (min / max / to)
+//$bp2: If you are using $type:to; you must supply a 2nd media query that is greater than $bp1
+@mixin bp($bp1, $type: "min", $bp2: null) {
+	//Mixin Vars
+	$min: map-get(
+		$bps,
+		$bp1
+	); //Search the map for the specified Breakpoint and get its value
+	$imin: map-get($bp-index, $bp1); //Get the index of the $bp1
+	$bp-next: next-bp(
+		#{$bp1}
+	); // get the next Bp for '$type:max;' & '$type:to;' usage
+	$max: map-get(
+		$bps,
+		$bp2
+	); //Search the map for the specified Breakpoint and get its value
+	$imax: map-get($bp-index, $bp2); //Get the index of the $bp2
+	$query-string: map-get($bp-types, $type); //Get the query string
+
+	//Check the Type is Valid
+	@if map-has-key($bp-types, $type) {
+		//Check What TYPE of bp
+
+		// $type = MIN-* (default)
+		@if $type==
+			"min" or
+			$type==
+			"min-height" or
+			$type==
+			"min-ratio" or
+			$type==
+			"orientation"
+		{
+			//Check For min Ratio and Orientation trying to use a $breakpoint
+			@if $type==
+				"min-ratio" and
+				map-has-key($bps, $bp1) or
+				$type==
+				"orientation" and
+				map-has-key($bps, $bp1)
+			{
+				@warn 'Breakpoint Error: $type `#{$type}` Cannot be used with `#{$bp1}`. Please enter a ratio (such as 16/9)';
+			}
+
+			//Check $bp1 is in $bps list
+			@else if map-has-key($bps, $bp1) {
+				//Check if $bp1 is the lowest bp
+				@if $imin==1 {
+					@content;
+				} @else {
+					//Wrap media query
+					@media ($query-string: $min) {
+						@content;
+					}
+				}
+
+				//Custom values
+			} @else {
+				//Wrap media query
+				@if $bp1 != 0 {
+					@media ($query-string: $bp1) {
+						@content;
+					}
+				} @else {
+					@content;
+				}
+			}
+
+			// $type = MAX
+		} @else if $type== "max" or $type== "max-height" or $type== "max-ratio"
+		{
+			//Check For max ratio trying to use a $breakpoint
+			@if $type== "max-ratio" and map-has-key($bps, $bp1) {
+				@warn 'Breakpoint Error: $type `#{$type}` Cannot be used with `#{$bp1}`. Please enter a ratio (such as 16/9)';
+			}
+
+			//Check $bp1 is in $bps list
+			@else if map-has-key($bps, $bp1) {
+				//Check if $bp1 is the lowest bp
+				@if $imin != $bp-total {
+					@media ($query-string: $min - 1) {
+						// Subtract 1px fromt the bp value so as not to cause query conflict
+						@content;
+					}
+
+					// Warn if top breakpoint is used
+				} @else {
+					@warn 'Invalid Max breakpoint: `#{$bp1}` is the highest breakpoint available please use a lower breakpoint.';
+				}
+
+				//Custom values
+			} @else {
+				//Wrap media query
+				@media ($query-string: $bp1) {
+					@content;
+				}
+			}
+
+			// $type = TO
+		} @else if $type== "to" or $type== "to-height" or $type== "to-ratio" {
+			@if $type==
+				"to-ratio" and
+				map-has-key($bps, $bp1) or
+				$type==
+				"to-ratio" and
+				map-has-key($bps, $bp2)
+			{
+				content: "WARN";
+				@content;
+				@warn 'Breakpoint Error: $type `#{$type}` Cannot be used with `#{$bp1}`. Please enter a ratio (such as 16/9)';
+			}
+
+			//Check $bp1 and $bp2 are both in $bps list
+			@else if map-has-key($bps, $bp1) and map-has-key($bps, $bp2) {
+				//Get the next BP up from $bp2 and subtract 1px
+				$max: map-get($bps, $bp2) - 1;
+
+				//Check $bp2 is bigger than $bp1
+				@if map-get($bp-index, $bp1) >map-get($bp-index, $bp2) {
+					@warn 'Invalid Max breakpoint: `#{$bp2}` is the greater than `#{$bp1}`';
+				}
+
+				//Check if $bp1 or $bp2 are the maximum breakpoint
+				@else if $imin==$bp-total or $imax==$bp-total {
+					//Wrap media query
+					@media (min-#{$query-string}: $min) {
+						@content; //Write content here
+					}
+				} @else if $imin==1 {
+					@media (max-#{$query-string}: $max) {
+						@content; //Write content here
+					}
+				} @else {
+					@if $imax < $bp-total {
+						//Wrap media query
+						@media (min-#{$query-string}: $min) and (max-#{$query-string}: $max) {
+							@content; //Write content here
+						}
+					} @else {
+						//Wrap media query
+						@media (min-#{$query-string}: $min) {
+							@content; //Write content here
+						}
+					}
+				}
+			}
+
+			//IF just $bp1 is in the key
+			@else if map-has-key($bps, $bp1) {
+				//Check if $bp1 is > $bp2
+				@if $min>#{$bp2} {
+					//Check if $bp1 is the first breakpoint
+					@if $imin==1 {
+						@media (max-#{$query-string}: $bp2) {
+							@content;
+						}
+					} @else {
+						//Wrap media query
+						@media (min-#{$query-string}: $min) and (max-#{$query-string}: $bp2) {
+							@content;
+						}
+					}
+				} @else {
+					@warn 'Breakpoint Error: $bp1(`#{$min}`) is greater than $bp2(`#{$bp2}`)';
+				}
+			}
+
+			//IF just $bp2 is in the key
+			@else if map-has-key($bps, $bp2) {
+				//Get the next BP up from $bp2 and subtract 1px
+				$max: map-get($bps, $bp2) - 1;
+
+				//Check that $bp1 is less than $max
+				@if #{$bp1} < $max {
+					//Check that $bp is NOT the last breakpoint
+					@if $imax < $bp-total {
+						@media (min-#{$query-string}: $bp1) and (max-#{$query-string}: $max) {
+							@content;
+						}
+
+						//If $bp2 IS the last breakpoint
+					} @else {
+						//Wrap media query
+						@media (min-#{$query-string}: $bp1) {
+							@content;
+						}
+					}
+				} @else {
+					@warn 'Breakpoint Error: $bp1(`#{$bp1}`) is greater than $bp2 (`#{$max}`)';
+				}
+			}
+
+			//IF Both are custom values
+			@else {
+				//Check $bp1 < $bp2
+				@if #{$bp1} < #{$bp2} {
+					//Wrap media query
+					@media (min-#{$query-string}: $bp1) and (max-#{$query-string}: $bp2) {
+						@content;
+					}
+				} @else {
+					@warn 'Breakpoint Error: $bp1(`#{$bp1}`) is greater than $bp2 (`#{$bp2}`)';
+				}
+			}
+		}
+
+		//WARN INVALID $TYPE
+	} @else {
+		@warn 'Invalid $type used in BP MIXIN: `#{$type}`';
+	}
+}

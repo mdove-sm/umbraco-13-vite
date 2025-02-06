@@ -1,0 +1,185 @@
+@use "sass:map";
+@use "sass:list";
+@use "sass:math" as *;
+@use "settings";
+@use "breakpoints" as *;
+@use "tools" as *;
+/////////////////////////////////////////
+// Element Layout Helpers
+/////////////////////////////////////////
+//:::::::::::::::::::::::::::::::::::::::
+// Style and object using Flexbox
+//:::::::::::::::::::::::::::::::::::::::
+@mixin flex(
+	$dir: row,
+	$justify: flex-start,
+	$alignItems: flex-start,
+	$alignCont: null,
+	$wrap: null,
+	$inline: false
+) {
+	@if $inline {
+		display: inline-flex;
+	} @else {
+		display: flex;
+	}
+
+	flex-direction: $dir;
+	justify-content: $justify;
+	align-items: $alignItems;
+	@if $alignCont {
+		align-content: $alignCont;
+	}
+	@if $wrap {
+		flex-wrap: $wrap;
+	}
+}
+
+/////////////////////////////////////////
+// @media Query helpers
+/////////////////////////////////////////
+
+// Hover/focus pseudo states that exclude touch only devices
+@mixin mediaHoverFocus {
+	@media (hover: hover) {
+		&:hover {
+			@content;
+		}
+	}
+	&:focus-visible {
+		@content;
+	}
+}
+
+// User Motion settings queries
+@mixin mediaReducedMotion {
+	@media (prefers-reduced-motion: reduce) {
+		@content;
+	}
+}
+
+@mixin mediaNoReducedMotion {
+	@media (prefers-reduced-motion: no-preference) {
+		@content;
+	}
+}
+/////////////////////////////////////////
+// USE, fetch and apply values form various settings lists
+/////////////////////////////////////////
+
+//:::::::::::::::::::::::::::::::::::::::
+// Fetch and apply space from settings
+//:::::::::::::::::::::::::::::::::::::::
+@function useSpace($space: 100) {
+	@if map.has-key(settings.$spacings, $space) {
+		@return #{toRem(map.get(settings.$spacings, $space))};
+	} @else {
+		@error "Space: '#{$space}' is not found in the settings.$spacings list.";
+	}
+}
+
+@function useBkg($bkg) {
+	@if map.has-key(settings.$col-bkgs, $bkg) {
+		$bkg: map-get(settings.$col-bkgs, $bkg);
+		@return list.nth($bkg, 1);
+	} @else {
+		@error "Space: '#{$bkg}' is not found in the settings.$col-bkgs list.";
+	}
+}
+
+/////////////////////////////////////////
+// Font/Type Helpers - Description
+/////////////////////////////////////////
+/////////////////////////////////////////
+// TYPE helpers - Description
+/////////////////////////////////////////
+// Return correct weight values to match Google font-stacks
+$google-weights: (
+	thin: 100,
+	xLight: 200,
+	light: 300,
+	reg: 400,
+	med: 500,
+	sbold: 600,
+	bold: 700,
+	xbold: 800,
+	black: 900,
+);
+@function fw($weight) {
+	@return map-get($google-weights, $weight);
+}
+
+//:::::::::::::::::::::::::::::::::::::::
+// assign a designated font-sale properties
+// Optional add weight and important too properties
+//:::::::::::::::::::::::::::::::::::::::
+@mixin fontScale($scale, $weight: false, $spacing: false, $important: false) {
+	@if map-has-key(settings.$type-scales, $scale) or
+		map-has-key(settings.$type-scales, #{$scale})
+	{
+		font-size: var(--ts-#{$scale}-fs) #{important($important)};
+		line-height: var(--ts-#{$scale}-lh) #{important($important)};
+
+		@if $weight {
+			font-weight: #{fw($weight)} #{important($important)};
+		}
+
+		@if $spacing {
+			letter-spacing: toRem($spacing) #{important($important)};
+		} @else {
+			letter-spacing: var(--ts-#{$scale}-ls) #{important($important)};
+		}
+	} @else {
+		@warn "#{$scale} is not a key found in $type-scales";
+	}
+}
+
+@mixin fontSize(
+	$size,
+	$line-height,
+	$font-weight: reg,
+	$letterspacing: false,
+	$important: null
+) {
+	font-size: #{toRem($size)} #{important($important)};
+	line-height: #{div(strip-unit($line-height), strip-unit($size))} #{important(
+			$important
+		)};
+	font-weight: fw($font-weight) #{important($important)};
+	@if $letterspacing {
+		letter-spacing: #{div(strip-unit($letterspacing), strip-unit($size)) +
+			em}
+			#{important($important)};
+	}
+}
+
+/////////////////////////////////////////
+// Element Style Strippers
+/////////////////////////////////////////
+@mixin stripList() {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+
+	> :where(li) {
+		display: inline-block;
+		margin: 0;
+	}
+}
+@mixin stripButton() {
+	border: none;
+	padding: 0;
+	font-size: inherit;
+	&:focus-visible {
+		outline: none;
+	}
+}
+@mixin stripInput() {
+	border: none;
+	padding: 0;
+	font-size: inherit;
+
+	&:focus-visible {
+		outline: none;
+	}
+}

@@ -1,7 +1,15 @@
+// Tools
 @use "utilities" as *;
+
+// Layers
+@forward "base"; // Key global styles
+@forward "components"; // Global element Library
+@forward "pages"; // Page layouts
+@forward "modules/critical"; // Reusable content modules
+
 body {
 	background-color: lightgreen;
-	color: black;
+	color: darkgreen;
 }
 
 #svg-vite {
@@ -9,4 +17,8 @@ body {
 	// width: 200px;
 	// aspect-ratio: 1/1;
 	background-size: contain;
+}
+
+svg {
+	fill: currentColor;
 }

@@ -10,6 +10,7 @@
 	},
 	"devDependencies": {
 		"@spiriit/vite-plugin-svg-spritemap": "^3.0.0",
+		"normalize.scss": "^0.1.0",
 		"sass": "^1.83.4",
 		"svgo": "^3.3.2",
 		"vite": "^6.0.5",

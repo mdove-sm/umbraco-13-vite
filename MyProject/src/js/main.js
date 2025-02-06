@@ -1,7 +1,9 @@
 import Swiper from "swiper";
 
-import "./components/component1.js";
+import component from "./components/component1.js";
 import "../scss/main.scss";
-console.log("HELLO MAIN JS");
 
-const swiper = new Swiper(".swiper", {});
+(function () {
+	console.log("HELLO MAIN JS");
+	const swiper = new Swiper(".swiper", {});
+})();

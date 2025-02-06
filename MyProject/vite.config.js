@@ -4,6 +4,7 @@ import { getAspDotNetCertificate } from "./certs/certs";
 
 // PLUGINS ///
 import FullReload from "vite-plugin-full-reload";
+import ViteSvgSpriteWrapper from "vite-svg-sprite-wrapper";
 import VitePluginSvgSpritemap from "@spiriit/vite-plugin-svg-spritemap";
 
 export default defineConfig(async ({ mode }) => {
@@ -13,7 +14,7 @@ export default defineConfig(async ({ mode }) => {
 		css: {
 			devSourcemap: true,
 		},
-		publicDir: "./assets/", // Must match output dir for bui;d
+		publicDir: "./assets/", // Must match output dir for build
 		build: {
 			outDir: "./wwwroot/assets/",
 			emptyOutDir: true, // clear the outout directory each build
@@ -35,13 +36,18 @@ export default defineConfig(async ({ mode }) => {
 		plugins: [
 			splitVendorChunkPlugin(),
 			FullReload(["config/routes.rb", "./Views/**/*"]), // Refresh dev when .cshtml changes
+			// Provide sprite for dev server
+			ViteSvgSpriteWrapper({
+				icons: "./assets/svg/*.svg",
+				outputDir: "./assets/icons",
+			}),
+			// provide .scss sheet and sprite for production
 			VitePluginSvgSpritemap("./assets/svg/*.svg", {
 				prefix: false,
 				svgo: true,
 				injectSvgOnDev: true,
 				output: {
-					name: "spritemap",
-					filename: "../svg/[name][extname]",
+					filename: "../icons/sprite[extname]",
 					view: false,
 					use: false,
 				},
@@ -52,18 +58,6 @@ export default defineConfig(async ({ mode }) => {
 						prefix: "icon-prefix",
 						sprites: "icons",
 					},
-					// callback: ({ content, options, createSpritemap }) => {
-					// 	let insert = "";
-					// 	insert += createSpritemap((name, svg) => {
-					// 		const selector = `${options.prefix}${name}`;
-					// 		let sprite = "";
-					// 		sprite = `.ico-${selector} {`;
-					// 		sprite += `\n\tbackground: url("${svg.svgDataUri}") center no-repeat;`;
-					// 		sprite += "\n}";
-					// 		return sprite;
-					// 	});
-					// 	return insert;
-					// },
 				},
 			}),
 		],
