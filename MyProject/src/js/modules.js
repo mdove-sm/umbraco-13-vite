@@ -1,4 +1,7 @@
 import "../scss/modules.scss";
+import "../scss/print.scss";
+
+
 (async function () {
 	console.log("HELLO MODULES");
 

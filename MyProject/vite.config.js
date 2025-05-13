@@ -1,4 +1,4 @@
-import { defineConfig, splitVendorChunkPlugin } from "vite";
+import { defineConfig } from "vite";
 import { resolve } from "path";
 import { getAspDotNetCertificate } from "./certs/certs";
 
@@ -25,6 +25,7 @@ export default defineConfig(async ({ mode }) => {
 				input: {
 					main: resolve(__dirname, "src/js/main.js"),
 					modules: resolve(__dirname, "src/js/modules.js"),
+					print: resolve(__dirname, "src/scss/print.scss"),
 				},
 				output: {
 					entryFileNames: "[name].[hash].js",
@@ -34,22 +35,17 @@ export default defineConfig(async ({ mode }) => {
 			},
 		},
 		plugins: [
-			splitVendorChunkPlugin(),
-			FullReload(["config/routes.rb", "./Views/**/*"]), // Refresh dev when .cshtml changes
-			// Provide sprite for dev server
-			ViteSvgSpriteWrapper({
-				icons: "./assets/svg/*.svg",
-				outputDir: "./assets/icons",
-			}),
+			FullReload("./Views/**/*"), // Refresh dev when .cshtml changes
+
 			// provide .scss sheet and sprite for production
 			VitePluginSvgSpritemap("./assets/svg/*.svg", {
 				prefix: false,
 				svgo: true,
-				injectSvgOnDev: true,
+				injectSvgOnDev: false,
 				output: {
-					filename: "../icons/sprite[extname]",
-					view: false,
-					use: false,
+					filename: "../icons/sprite.[hash][extname]",
+					view: true,
+					use: true,
 				},
 				styles: {
 					filename: "src/scss/utilities/_spritemap.scss",

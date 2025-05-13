@@ -1,3 +1,4 @@
+
 // Tools
 @use "utilities" as *;
 
@@ -7,18 +8,29 @@
 @forward "pages"; // Page layouts
 @forward "modules/critical"; // Reusable content modules
 
-body {
-	background-color: lightgreen;
-	color: darkgreen;
-}
+	body {
+		background-color: lightgreen;
+		color: darkgreen;
+	}
 
-#svg-vite {
-	@include icon-sprite("vite", "box");
-	// width: 200px;
-	// aspect-ratio: 1/1;
-	background-size: contain;
-}
+	.svg-test {
+		@include icon-sprite("test"); // No sizes added
+		width: 100px;
+		height: 100px;
+		background-size: contain;
 
-svg {
-	fill: currentColor;
-}
+
+		&--incSize {
+			@include icon-sprite("test", true); // adds background-size property
+		}
+
+		&--box {
+			@include icon-sprite("test", box); // add width/height properties
+		}
+
+	}
+
+	svg {
+		fill: currentColor;
+	}
+
